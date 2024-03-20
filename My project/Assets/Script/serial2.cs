@@ -1,18 +1,39 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using System.IO.Ports;
+using TMPro;
 
 public class serial2 : MonoBehaviour
 {
-    // Start is called before the first frame update
+    private SerialPort _serialPort = new SerialPort();
+    private byte[] buffer = new byte[32];
+
+    public TextMeshProUGUI myText;
+
+    private static int counter = 0;
+
     void Start()
     {
-        
+        _serialPort.PortName = "COM3";
+        _serialPort.BaudRate = 115200;
+        _serialPort.DtrEnable = true;
+        _serialPort.Open();
+        Debug.Log("Open Serial Port");
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
+        myText.text = counter.ToString();
+        counter++;
+
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            byte[] data = { 0x31 };// or byte[] data = {'1'};
+            _serialPort.Write(data, 0, 1);
+        }
+        if (_serialPort.BytesToRead > 0)
+        {
+            int numData = _serialPort.Read(buffer, 0, 20);
+            Debug.Log(System.Text.Encoding.ASCII.GetString(buffer));
+            Debug.Log("Bytes received: " + numData.ToString());
+        }
     }
-}
